@@ -1,0 +1,3270 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的熱量紀錄</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #f4f4f4;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Helvetica Neue",
+        Arial,
+        sans-serif;
+    color: #222;
+}
+
+button,
+input,
+select {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+.app {
+    max-width: 520px;
+    min-height: 100vh;
+    margin: auto;
+    background: #fff;
+    padding-bottom: 110px;
+}
+
+/* =========================
+   共用
+========================= */
+
+.page {
+    padding: 22px 18px;
+}
+
+.page-title {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.sub-title {
+    color: #777;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.section-title {
+    margin: 26px 0 12px;
+    font-size: 19px;
+    font-weight: 700;
+}
+
+.card {
+    background: #fafafa;
+    border: 1px solid #e8e8e8;
+    border-radius: 18px;
+    padding: 18px;
+    margin-bottom: 14px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* =========================
+   日期
+========================= */
+
+.date-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 18px 0;
+}
+
+.date-button {
+    border: none;
+    background: #f0f0f0;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    font-size: 20px;
+}
+
+.date-text {
+    font-weight: 600;
+}
+
+/* =========================
+   熱量
+========================= */
+
+.calorie-card {
+    border-radius: 22px;
+    padding: 22px;
+    background: #f1f1f1;
+    margin-bottom: 14px;
+}
+
+.calorie-number {
+    font-size: 38px;
+    font-weight: 700;
+}
+
+.calorie-target {
+    color: #777;
+    margin-top: 3px;
+}
+
+.progress {
+    height: 12px;
+    background: #dedede;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-top: 15px;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: #222;
+    border-radius: 20px;
+    transition: width 0.3s ease;
+}
+
+.progress-bar.water {
+    background: #555;
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 13px;
+    color: #777;
+}
+
+/* =========================
+   體重 / 水
+========================= */
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.info-card {
+    background: #fafafa;
+    border: 1px solid #e8e8e8;
+    border-radius: 18px;
+    padding: 17px;
+}
+
+.info-label {
+    color: #777;
+    font-size: 13px;
+}
+
+.info-number {
+    font-size: 27px;
+    font-weight: 700;
+    margin: 7px 0;
+}
+
+.info-unit {
+    font-size: 13px;
+    color: #777;
+}
+
+.info-small {
+    color: #777;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+/* =========================
+   水
+========================= */
+
+.water-actions {
+    display: flex;
+    gap: 7px;
+    margin-top: 12px;
+}
+
+.small-button {
+    flex: 1;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 10px;
+    padding: 8px 4px;
+}
+
+.small-button:active {
+    background: #eee;
+}
+
+/* =========================
+   食物
+========================= */
+
+.food-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.food-item:last-child {
+    border-bottom: none;
+}
+
+.food-name {
+    font-weight: 600;
+}
+
+.food-detail {
+    color: #888;
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.food-calories {
+    text-align: right;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.food-actions {
+    display: flex;
+    gap: 5px;
+    margin-left: 10px;
+}
+
+.icon-button {
+    border: none;
+    background: #eee;
+    border-radius: 8px;
+    padding: 6px 8px;
+    font-size: 12px;
+}
+
+.empty {
+    text-align: center;
+    color: #999;
+    padding: 28px 10px;
+}
+
+/* =========================
+   新增按鈕
+========================= */
+
+.add-button {
+    position: fixed;
+    bottom: 72px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(min(520px, 100%) - 36px);
+    border: none;
+    background: #222;
+    color: white;
+    border-radius: 16px;
+    padding: 15px;
+    font-size: 16px;
+    font-weight: 600;
+    z-index: 20;
+}
+
+/* =========================
+   底部導覽
+========================= */
+
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(520px, 100%);
+    height: 64px;
+    background: rgba(255,255,255,0.96);
+    border-top: 1px solid #ddd;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    z-index: 15;
+}
+
+.nav-button {
+    border: none;
+    background: transparent;
+    color: #999;
+    font-size: 12px;
+}
+
+.nav-button.active {
+    color: #222;
+    font-weight: 700;
+}
+
+/* =========================
+   歷史
+========================= */
+
+.history-item {
+    border: 1px solid #e7e7e7;
+    border-radius: 16px;
+    padding: 15px;
+    margin-bottom: 10px;
+    background: #fafafa;
+}
+
+.history-top {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+}
+
+.history-bottom {
+    display: flex;
+    gap: 15px;
+    margin-top: 8px;
+    font-size: 13px;
+    color: #777;
+}
+
+/* =========================
+   統計
+========================= */
+
+.chart-card {
+    background: #fafafa;
+    border: 1px solid #e8e8e8;
+    border-radius: 18px;
+    padding: 15px;
+    margin-bottom: 14px;
+}
+
+.chart-title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.chart-subtitle {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 12px;
+}
+
+.chart-container {
+    width: 100%;
+    height: 230px;
+}
+
+canvas {
+    width: 100%;
+    height: 230px;
+    display: block;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.stat-box {
+    background: #f5f5f5;
+    border-radius: 14px;
+    padding: 14px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #888;
+}
+
+.stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    margin-top: 5px;
+}
+
+/* =========================
+   設定
+========================= */
+
+.form-group {
+    margin-bottom: 17px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+input,
+select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d8d8d8;
+    border-radius: 10px;
+    outline: none;
+    background: white;
+}
+
+input:focus,
+select:focus {
+    border-color: #555;
+}
+
+.primary-button {
+    width: 100%;
+    border: none;
+    background: #222;
+    color: white;
+    border-radius: 11px;
+    padding: 13px;
+    font-weight: 600;
+}
+
+.secondary-button {
+    width: 100%;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 11px;
+    padding: 13px;
+}
+
+/* =========================
+   Modal
+========================= */
+
+.modal-background {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 100;
+}
+
+.modal {
+    width: min(520px, 100%);
+    max-height: 90vh;
+    overflow-y: auto;
+    background: white;
+    border-radius: 24px 24px 0 0;
+    padding: 22px 18px 30px;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.modal-title {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.close-button {
+    border: none;
+    background: #eee;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+}
+
+/* =========================
+   搜尋
+========================= */
+
+.search-results {
+    margin-top: 8px;
+}
+
+.search-result {
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 7px;
+    background: #fafafa;
+    text-align: left;
+    width: 100%;
+}
+
+.search-result strong {
+    display: block;
+}
+
+.search-result span {
+    display: block;
+    font-size: 12px;
+    color: #888;
+    margin-top: 3px;
+}
+
+/* =========================
+   RWD
+========================= */
+
+@media (max-width: 380px) {
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .calorie-number {
+        font-size: 34px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- =========================
+         今天
+    ========================== -->
+
+    <main id="todayPage" class="page">
+
+        <h1 id="todayTitle" class="page-title">今日熱量</h1>
+        <div id="todaySubtitle" class="sub-title"></div>
+
+        <div class="date-bar">
+            <button class="date-button" onclick="changeDate(-1)">‹</button>
+            <div id="dateText" class="date-text"></div>
+            <button class="date-button" onclick="changeDate(1)">›</button>
+        </div>
+
+        <!-- 熱量 -->
+        <div class="calorie-card">
+
+            <div>
+                <span id="todayCalories" class="calorie-number">0</span>
+                <span> kcal</span>
+            </div>
+
+            <div class="calorie-target">
+                建議目標
+                <strong id="calorieTargetText">--</strong>
+                kcal
+            </div>
+
+            <div class="progress">
+                <div id="calorieProgress" class="progress-bar"></div>
+            </div>
+
+            <div class="progress-info">
+                <span id="caloriePercent">0%</span>
+                <span id="calorieRemaining">剩餘 -- kcal</span>
+            </div>
+
+        </div>
+
+        <!-- 體重與喝水 -->
+        <div class="info-grid">
+
+            <!-- 體重 -->
+            <div class="info-card">
+
+                <div class="info-label">目前體重</div>
+
+                <div>
+                    <span id="currentWeight" class="info-number">--</span>
+                    <span class="info-unit">kg</span>
+                </div>
+
+                <div id="weightCalculation" class="info-small">
+                    尚未紀錄體重
+                </div>
+
+                <button
+                    class="small-button"
+                    style="width:100%; margin-top:10px;"
+                    onclick="openWeightModal()">
+                    紀錄體重
+                </button>
+
+            </div>
+
+            <!-- 喝水 -->
+            <div class="info-card">
+
+                <div class="info-label">今日喝水</div>
+
+                <div>
+                    <span id="waterTotal" class="info-number">0</span>
+                    <span class="info-unit">ml</span>
+                </div>
+
+                <div class="info-small">
+                    目標 <span id="waterTargetText">--</span> ml
+                </div>
+
+                <div class="progress">
+                    <div id="waterProgress" class="progress-bar water"></div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- 喝水按鈕 -->
+        <div class="card" style="margin-top:12px;">
+
+            <div style="font-weight:600;">快速喝水</div>
+
+            <div class="water-actions">
+
+                <button class="small-button" onclick="addWater(250)">
+                    +250
+                </button>
+
+                <button class="small-button" onclick="addWater(500)">
+                    +500
+                </button>
+
+                <button class="small-button" onclick="customWater()">
+                    自訂
+                </button>
+
+                <button class="small-button" onclick="clearWater()">
+                    清除
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- 食物 -->
+        <div class="section-title">今天吃了什麼</div>
+
+        <div id="foodList"></div>
+
+    </main>
+
+
+    <!-- =========================
+         歷史
+    ========================== -->
+
+    <main id="historyPage" class="page hidden">
+
+        <h1 class="page-title">歷史紀錄</h1>
+        <div class="sub-title">所有有紀錄的日期</div>
+
+        <div id="historyList" style="margin-top:20px;"></div>
+
+    </main>
+
+
+    <!-- =========================
+         統計
+    ========================== -->
+
+    <main id="statsPage" class="page hidden">
+
+        <h1 class="page-title">統計</h1>
+        <div class="sub-title">看看最近的變化</div>
+
+        <!-- 熱量 -->
+        <div class="chart-card" style="margin-top:20px;">
+
+            <div class="chart-title">
+                最近 7 天熱量
+            </div>
+
+            <div id="calorieChartSubtitle" class="chart-subtitle">
+                每日攝取量與建議目標
+            </div>
+
+            <div class="chart-container">
+                <canvas id="calorieChart"></canvas>
+            </div>
+
+        </div>
+
+        <!-- 體重 -->
+        <div class="chart-card">
+
+            <div class="chart-title">
+                體重變化
+            </div>
+
+            <div class="chart-subtitle">
+                最近 14 天有紀錄的體重
+            </div>
+
+            <div class="chart-container">
+                <canvas id="weightChart"></canvas>
+            </div>
+
+        </div>
+
+        <!-- 喝水 -->
+        <div class="chart-card">
+
+            <div class="chart-title">
+                最近 7 天喝水
+            </div>
+
+            <div class="chart-subtitle">
+                每日喝水量
+            </div>
+
+            <div class="chart-container">
+                <canvas id="waterChart"></canvas>
+            </div>
+
+        </div>
+
+        <!-- 統計摘要 -->
+        <div class="stats-grid">
+
+            <div class="stat-box">
+                <div class="stat-label">7 天平均熱量</div>
+                <div id="averageCalories" class="stat-value">--</div>
+            </div>
+
+            <div class="stat-box">
+                <div class="stat-label">7 天平均喝水</div>
+                <div id="averageWater" class="stat-value">--</div>
+            </div>
+
+            <div class="stat-box">
+                <div class="stat-label">最近體重</div>
+                <div id="latestWeight" class="stat-value">--</div>
+            </div>
+
+            <div class="stat-box">
+                <div class="stat-label">體重變化</div>
+                <div id="weightChange" class="stat-value">--</div>
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- =========================
+         設定
+    ========================== -->
+
+    <main id="settingsPage" class="page hidden">
+
+        <h1 class="page-title">設定</h1>
+        <div class="sub-title">調整你的每日目標</div>
+
+        <div class="card" style="margin-top:20px;">
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    每日熱量目標
+                </label>
+
+                <input
+                    id="dailyTargetInput"
+                    type="number"
+                    min="500"
+                    max="10000"
+                    step="50"
+                >
+
+                <div class="info-small" style="margin-top:6px;">
+                    預設會依體重自動估算，也可以在這裡手動覆寫。
+                </div>
+
+            </div>
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    每日喝水目標
+                </label>
+
+                <input
+                    id="waterTargetInput"
+                    type="number"
+                    min="500"
+                    max="10000"
+                    step="50"
+                >
+
+            </div>
+
+            <button class="primary-button" onclick="saveSettings()">
+                儲存設定
+            </button>
+
+        </div>
+
+        <div class="card">
+
+            <div style="font-weight:700; margin-bottom:10px;">
+                自動計算方式
+            </div>
+
+            <div class="info-small">
+
+                體重會先被歸入區間，再使用該區間的上限計算。
+
+                <br><br>
+
+                例如：
+
+                <br>
+                82.3 kg → 以 85 kg 計算
+                <br>
+                87.2 kg → 以 90 kg 計算
+
+                <br><br>
+
+                熱量估算：
+                <strong>計算基準體重 × 25 kcal</strong>
+
+                <br>
+
+                水量估算：
+                <strong>計算基準體重 × 30 ml</strong>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<!-- =========================
+     新增食物 Modal
+========================== -->
+
+<div id="addModal" class="modal-background hidden">
+
+    <div class="modal">
+
+        <div class="modal-header">
+
+            <div class="modal-title">
+                紀錄食物
+            </div>
+
+            <button
+                class="close-button"
+                onclick="closeAddModal()">
+                ×
+            </button>
+
+        </div>
+
+        <div
+            id="recordDateLabel"
+            class="info-small"
+            style="margin-bottom:15px;">
+        </div>
+
+        <!-- 搜尋舊食物 -->
+
+        <div class="form-group">
+
+            <label class="form-label">
+                搜尋以前紀錄過的食物
+            </label>
+
+            <input
+                id="foodSearch"
+                type="text"
+                placeholder="輸入食物名稱"
+                oninput="searchMyFoods()"
+            >
+
+            <div id="searchResults" class="search-results"></div>
+
+        </div>
+
+        <!-- 食物資料 -->
+
+        <div class="form-group">
+
+            <label class="form-label">
+                食物名稱
+            </label>
+
+            <input
+                id="foodName"
+                type="text"
+                placeholder="例如：雞胸肉"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label class="form-label">
+                每份熱量
+            </label>
+
+            <input
+                id="foodCalories"
+                type="number"
+                min="0"
+                placeholder="例如：165"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label class="form-label">
+                單位
+            </label>
+
+            <input
+                id="foodUnit"
+                type="text"
+                placeholder="例如：份、碗、個"
+                value="份"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label class="form-label">
+                吃了幾份？
+            </label>
+
+            <input
+                id="foodQuantity"
+                type="number"
+                min="0.1"
+                step="0.1"
+                value="1"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label class="form-label">
+                餐別
+            </label>
+
+            <select id="mealType">
+
+                <option value="早餐">早餐</option>
+                <option value="午餐">午餐</option>
+                <option value="晚餐">晚餐</option>
+                <option value="點心">點心</option>
+                <option value="其他">其他</option>
+
+            </select>
+
+        </div>
+
+        <button
+            class="primary-button"
+            onclick="addFood()">
+            加入紀錄
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     編輯食物 Modal
+========================== -->
+
+<div id="editModal" class="modal-background hidden">
+
+    <div class="modal">
+
+        <div class="modal-header">
+
+            <div class="modal-title">
+                編輯紀錄
+            </div>
+
+            <button
+                class="close-button"
+                onclick="closeEditModal()">
+                ×
+            </button>
+
+        </div>
+
+        <div class="form-group">
+
+            <label class="form-label">
+                食物名稱
+            </label>
+
+            <input id="editName" type="text">
+
+        </div>
+
+        <div class="form-group">
+
+            <label class="form-label">
+                每份熱量
+            </label>
+
+            <input id="editCalories" type="number">
+
+        </div>
+
+        <div class="form-group">
+
+            <label class="form-label">
+                單位
+            </label>
+
+            <input id="editUnit" type="text">
+
+        </div>
+
+        <div class="form-group">
+
+            <label class="form-label">
+                數量
+            </label>
+
+            <input
+                id="editQuantity"
+                type="number"
+                min="0.1"
+                step="0.1"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label class="form-label">
+                餐別
+            </label>
+
+            <select id="editMealType">
+
+                <option value="早餐">早餐</option>
+                <option value="午餐">午餐</option>
+                <option value="晚餐">晚餐</option>
+                <option value="點心">點心</option>
+                <option value="其他">其他</option>
+
+            </select>
+
+        </div>
+
+        <button
+            class="primary-button"
+            onclick="saveEdit()">
+            儲存修改
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     體重 Modal
+========================== -->
+
+<div id="weightModal" class="modal-background hidden">
+
+    <div class="modal">
+
+        <div class="modal-header">
+
+            <div class="modal-title">
+                紀錄體重
+            </div>
+
+            <button
+                class="close-button"
+                onclick="closeWeightModal()">
+                ×
+            </button>
+
+        </div>
+
+        <div
+            id="weightDateLabel"
+            class="info-small"
+            style="margin-bottom:15px;">
+        </div>
+
+        <div class="form-group">
+
+            <label class="form-label">
+                體重（kg）
+            </label>
+
+            <input
+                id="weightInput"
+                type="number"
+                min="20"
+                max="300"
+                step="0.1"
+                placeholder="例如：82.3"
+            >
+
+        </div>
+
+        <button
+            class="primary-button"
+            onclick="saveWeight()">
+            儲存體重
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     新增按鈕
+========================== -->
+
+<button
+    id="addFoodButton"
+    class="add-button"
+    onclick="openAddModal()">
+    ＋ 紀錄食物
+</button>
+
+
+<!-- =========================
+     底部導覽
+========================== -->
+
+<nav class="bottom-nav">
+
+    <button
+        id="navToday"
+        class="nav-button active"
+        onclick="showPage('today')">
+        今天
+    </button>
+
+    <button
+        id="navHistory"
+        class="nav-button"
+        onclick="showPage('history')">
+        歷史
+    </button>
+
+    <button
+        id="navStats"
+        class="nav-button"
+        onclick="showPage('stats')">
+        統計
+    </button>
+
+    <button
+        id="navSettings"
+        class="nav-button"
+        onclick="showPage('settings')">
+        設定
+    </button>
+
+</nav>
+
+
+<script>
+
+/* =====================================================
+   資料
+===================================================== */
+
+let records =
+    JSON.parse(localStorage.getItem("records")) || {};
+
+let myFoods =
+    JSON.parse(localStorage.getItem("myFoods")) || {};
+
+let weightRecords =
+    JSON.parse(localStorage.getItem("weightRecords")) || {};
+
+let waterRecords =
+    JSON.parse(localStorage.getItem("waterRecords")) || {};
+
+let dailyTarget =
+    Number(localStorage.getItem("dailyTarget")) || null;
+
+let waterTarget =
+    Number(localStorage.getItem("waterTarget")) || null;
+
+let manualTarget =
+    localStorage.getItem("manualTarget") === "true";
+
+let manualWaterTarget =
+    localStorage.getItem("manualWaterTarget") === "true";
+
+let currentDate = getToday();
+
+let editingIndex = null;
+
+
+/* =====================================================
+   初始化舊資料
+===================================================== */
+
+function initializeData() {
+
+    /*
+       如果舊版使用的是陣列，
+       轉成物件。
+    */
+
+    if (Array.isArray(myFoods)) {
+
+        myFoods = deduplicateFoods(myFoods);
+
+    } else {
+
+        myFoods = [];
+
+    }
+
+    /*
+       如果以前第一版使用 foods，
+       嘗試把它搬到今天。
+    */
+
+    const oldFoods =
+        JSON.parse(localStorage.getItem("foods")) || [];
+
+    if (
+        Object.keys(records).length === 0 &&
+        oldFoods.length > 0
+    ) {
+
+        records[currentDate] = oldFoods.map(food => {
+
+            const calories =
+                Number(food.calories) || 0;
+
+            return {
+                name: food.name || "未命名食物",
+                calories: calories,
+                unit: food.unit || "份",
+                quantity: 1,
+                totalCalories: calories,
+                mealType: "其他"
+            };
+
+        });
+
+    }
+
+    saveData();
+
+}
+
+
+/* =====================================================
+   localStorage
+===================================================== */
+
+function saveData() {
+
+    localStorage.setItem(
+        "records",
+        JSON.stringify(records)
+    );
+
+    localStorage.setItem(
+        "myFoods",
+        JSON.stringify(myFoods)
+    );
+
+    localStorage.setItem(
+        "weightRecords",
+        JSON.stringify(weightRecords)
+    );
+
+    localStorage.setItem(
+        "waterRecords",
+        JSON.stringify(waterRecords)
+    );
+
+    if (dailyTarget !== null) {
+
+        localStorage.setItem(
+            "dailyTarget",
+            dailyTarget
+        );
+
+    }
+
+    if (waterTarget !== null) {
+
+        localStorage.setItem(
+            "waterTarget",
+            waterTarget
+        );
+
+    }
+
+    localStorage.setItem(
+        "manualTarget",
+        manualTarget
+    );
+
+    localStorage.setItem(
+        "manualWaterTarget",
+        manualWaterTarget
+    );
+
+}
+
+
+/* =====================================================
+   日期工具
+===================================================== */
+
+function getToday() {
+
+    const now = new Date();
+
+    return formatDate(now);
+
+}
+
+
+function formatDate(date) {
+
+    const year = date.getFullYear();
+
+    const month =
+        String(date.getMonth() + 1).padStart(2, "0");
+
+    const day =
+        String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+
+}
+
+
+function parseDate(dateString) {
+
+    const [year, month, day] =
+        dateString.split("-").map(Number);
+
+    return new Date(
+        year,
+        month - 1,
+        day
+    );
+
+}
+
+
+function getDisplayDate(dateString) {
+
+    const date = parseDate(dateString);
+
+    return `${date.getMonth() + 1}/${date.getDate()}`;
+
+}
+
+
+function getFullDisplayDate(dateString) {
+
+    const date = parseDate(dateString);
+
+    return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+
+}
+
+
+function changeDate(amount) {
+
+    const date = parseDate(currentDate);
+
+    date.setDate(date.getDate() + amount);
+
+    currentDate = formatDate(date);
+
+    renderToday();
+
+}
+
+
+/* =====================================================
+   體重 → 區間
+===================================================== */
+
+function getWeightBase(weight) {
+
+    /*
+       例如：
+
+       82.3 → 85
+       87.2 → 90
+       91.4 → 95
+
+       直接向上取到 5 的倍數。
+    */
+
+    return Math.ceil(weight / 5) * 5;
+
+}
+
+
+/* =====================================================
+   自動熱量
+===================================================== */
+
+function calculateAutoCalorie(weight) {
+
+    if (!weight || weight <= 0) {
+
+        return null;
+
+    }
+
+    const baseWeight =
+        getWeightBase(weight);
+
+    return baseWeight * 25;
+
+}
+
+
+/* =====================================================
+   自動水量
+===================================================== */
+
+function calculateAutoWater(weight) {
+
+    if (!weight || weight <= 0) {
+
+        return null;
+
+    }
+
+    const baseWeight =
+        getWeightBase(weight);
+
+    return baseWeight * 30;
+
+}
+
+
+/* =====================================================
+   取得目前目標
+===================================================== */
+
+function getTodayWeight(date = currentDate) {
+
+    return Number(weightRecords[date]) || null;
+
+}
+
+
+function getCalorieTarget(date = currentDate) {
+
+    if (manualTarget && dailyTarget) {
+
+        return dailyTarget;
+
+    }
+
+    const weight =
+        getTodayWeight(date);
+
+    const autoTarget =
+        calculateAutoCalorie(weight);
+
+    return autoTarget || dailyTarget || 2000;
+
+}
+
+
+function getWaterTarget(date = currentDate) {
+
+    if (manualWaterTarget && waterTarget) {
+
+        return waterTarget;
+
+    }
+
+    const weight =
+        getTodayWeight(date);
+
+    const autoTarget =
+        calculateAutoWater(weight);
+
+    return autoTarget || waterTarget || 2000;
+
+}
+
+
+/* =====================================================
+   食物資料
+===================================================== */
+
+function getDayRecords(date = currentDate) {
+
+    if (!records[date]) {
+
+        records[date] = [];
+
+    }
+
+    return records[date];
+
+}
+
+
+function getDayCalories(date = currentDate) {
+
+    return getDayRecords(date).reduce(
+        (sum, food) =>
+            sum + (Number(food.totalCalories) || 0),
+        0
+    );
+
+}
+
+
+/* =====================================================
+   食物去重
+===================================================== */
+
+function deduplicateFoods(list) {
+
+    const result = [];
+
+    const seen = new Set();
+
+    list.forEach(food => {
+
+        const key =
+            `${food.name}|${food.calories}|${food.unit}`;
+
+        if (!seen.has(key)) {
+
+            seen.add(key);
+
+            result.push(food);
+
+        }
+
+    });
+
+    return result;
+
+}
+
+
+/* =====================================================
+   安全顯示文字
+===================================================== */
+
+function escapeHTML(text) {
+
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+/* =====================================================
+   Today
+===================================================== */
+
+function renderToday() {
+
+    const isToday =
+        currentDate === getToday();
+
+    document.getElementById("todayTitle").textContent =
+        isToday
+            ? "今日熱量"
+            : `${getDisplayDate(currentDate)} 熱量`;
+
+    document.getElementById("todaySubtitle").textContent =
+        isToday
+            ? "記錄今天吃了什麼"
+            : "查看這一天的紀錄";
+
+    document.getElementById("dateText").textContent =
+        getFullDisplayDate(currentDate);
+
+    const calories =
+        getDayCalories(currentDate);
+
+    const target =
+        getCalorieTarget(currentDate);
+
+    const percent =
+        target > 0
+            ? Math.min(calories / target * 100, 100)
+            : 0;
+
+    document.getElementById("todayCalories").textContent =
+        Math.round(calories);
+
+    document.getElementById("calorieTargetText").textContent =
+        Math.round(target);
+
+    document.getElementById("calorieProgress").style.width =
+        percent + "%";
+
+    document.getElementById("caloriePercent").textContent =
+        Math.round(calories / target * 100) + "%";
+
+    const remaining =
+        target - calories;
+
+    document.getElementById("calorieRemaining").textContent =
+        remaining >= 0
+            ? `剩餘 ${Math.round(remaining)} kcal`
+            : `超過 ${Math.round(Math.abs(remaining))} kcal`;
+
+    renderWeight();
+
+    renderWater();
+
+    renderFoodList();
+
+}
+
+
+/* =====================================================
+   體重
+===================================================== */
+
+function renderWeight() {
+
+    const weight =
+        getTodayWeight(currentDate);
+
+    const weightElement =
+        document.getElementById("currentWeight");
+
+    const calculation =
+        document.getElementById("weightCalculation");
+
+    if (!weight) {
+
+        weightElement.textContent = "--";
+
+        calculation.textContent =
+            "尚未紀錄體重";
+
+        return;
+
+    }
+
+    weightElement.textContent =
+        weight.toFixed(1);
+
+    const base =
+        getWeightBase(weight);
+
+    const autoCalories =
+        calculateAutoCalorie(weight);
+
+    const autoWater =
+        calculateAutoWater(weight);
+
+    calculation.innerHTML =
+        `以 <strong>${base} kg</strong> 計算<br>` +
+        `熱量約 ${autoCalories} kcal<br>` +
+        `水量約 ${autoWater} ml`;
+
+}
+
+
+/* =====================================================
+   水
+===================================================== */
+
+function renderWater() {
+
+    const water =
+        Number(waterRecords[currentDate]) || 0;
+
+    const target =
+        getWaterTarget(currentDate);
+
+    const percent =
+        target > 0
+            ? Math.min(water / target * 100, 100)
+            : 0;
+
+    document.getElementById("waterTotal").textContent =
+        Math.round(water);
+
+    document.getElementById("waterTargetText").textContent =
+        Math.round(target);
+
+    document.getElementById("waterProgress").style.width =
+        percent + "%";
+
+}
+
+
+/* =====================================================
+   食物列表
+===================================================== */
+
+function renderFoodList() {
+
+    const container =
+        document.getElementById("foodList");
+
+    const list =
+        getDayRecords(currentDate);
+
+    if (list.length === 0) {
+
+        container.innerHTML =
+            `<div class="empty">
+                今天還沒有食物紀錄
+            </div>`;
+
+        return;
+
+    }
+
+    const groups = {
+
+        "早餐": [],
+        "午餐": [],
+        "晚餐": [],
+        "點心": [],
+        "其他": []
+
+    };
+
+    list.forEach((food, index) => {
+
+        if (!groups[food.mealType]) {
+
+            groups["其他"].push({
+                ...food,
+                index
+            });
+
+        } else {
+
+            groups[food.mealType].push({
+                ...food,
+                index
+            });
+
+        }
+
+    });
+
+    let html = "";
+
+    Object.keys(groups).forEach(meal => {
+
+        if (groups[meal].length === 0) {
+
+            return;
+
+        }
+
+        html += `
+            <div style="margin-top:18px; font-weight:700;">
+                ${meal}
+            </div>
+        `;
+
+        groups[meal].forEach(food => {
+
+            html += `
+                <div class="food-item">
+
+                    <div style="min-width:0;">
+
+                        <div class="food-name">
+                            ${escapeHTML(food.name)}
+                        </div>
+
+                        <div class="food-detail">
+                            ${food.quantity}
+                            ${escapeHTML(food.unit)}
+                            × ${food.calories} kcal
+                        </div>
+
+                    </div>
+
+                    <div style="display:flex; align-items:center;">
+
+                        <div class="food-calories">
+                            ${Math.round(food.totalCalories)} kcal
+                        </div>
+
+                        <div class="food-actions">
+
+                            <button
+                                class="icon-button"
+                                onclick="openEditModal(${food.index})">
+                                編輯
+                            </button>
+
+                            <button
+                                class="icon-button"
+                                onclick="deleteFood(${food.index})">
+                                刪除
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            `;
+
+        });
+
+    });
+
+    container.innerHTML = html;
+
+}
+
+
+/* =====================================================
+   新增食物 Modal
+===================================================== */
+
+function openAddModal() {
+
+    document.getElementById("addModal")
+        .classList.remove("hidden");
+
+    document.getElementById("recordDateLabel").textContent =
+        `將紀錄到：${getFullDisplayDate(currentDate)}`;
+
+    document.getElementById("foodSearch").value = "";
+
+    document.getElementById("foodName").value = "";
+
+    document.getElementById("foodCalories").value = "";
+
+    document.getElementById("foodUnit").value = "份";
+
+    document.getElementById("foodQuantity").value = "1";
+
+    document.getElementById("mealType").value = "早餐";
+
+    document.getElementById("searchResults").innerHTML = "";
+
+}
+
+
+function closeAddModal() {
+
+    document.getElementById("addModal")
+        .classList.add("hidden");
+
+}
+
+
+/* =====================================================
+   搜尋以前的食物
+===================================================== */
+
+function searchMyFoods() {
+
+    const keyword =
+        document.getElementById("foodSearch")
+            .value
+            .trim()
+            .toLowerCase();
+
+    const container =
+        document.getElementById("searchResults");
+
+    if (!keyword) {
+
+        container.innerHTML = "";
+
+        return;
+
+    }
+
+    const results =
+        myFoods.filter(food =>
+            String(food.name)
+                .toLowerCase()
+                .includes(keyword)
+        );
+
+    if (results.length === 0) {
+
+        container.innerHTML =
+            `<div class="info-small">
+                找不到以前的紀錄，可以直接在下面新增。
+            </div>`;
+
+        return;
+
+    }
+
+    container.innerHTML =
+        results.map((food, index) => `
+
+            <button
+                class="search-result"
+                onclick="selectMyFood(${myFoods.indexOf(food)})">
+
+                <strong>
+                    ${escapeHTML(food.name)}
+                </strong>
+
+                <span>
+                    ${food.calories} kcal / ${escapeHTML(food.unit)}
+                </span>
+
+            </button>
+
+        `).join("");
+
+}
+
+
+/* =====================================================
+   選擇舊食物
+===================================================== */
+
+function selectMyFood(index) {
+
+    const food =
+        myFoods[index];
+
+    if (!food) {
+
+        return;
+
+    }
+
+    document.getElementById("foodName").value =
+        food.name;
+
+    document.getElementById("foodCalories").value =
+        food.calories;
+
+    document.getElementById("foodUnit").value =
+        food.unit;
+
+    document.getElementById("foodQuantity").value =
+        1;
+
+}
+
+
+/* =====================================================
+   新增食物
+===================================================== */
+
+function addFood() {
+
+    const name =
+        document.getElementById("foodName")
+            .value
+            .trim();
+
+    const calories =
+        Number(
+            document.getElementById("foodCalories")
+                .value
+        );
+
+    const unit =
+        document.getElementById("foodUnit")
+            .value
+            .trim() || "份";
+
+    const quantity =
+        Number(
+            document.getElementById("foodQuantity")
+                .value
+        );
+
+    const mealType =
+        document.getElementById("mealType")
+            .value;
+
+    if (!name) {
+
+        alert("請輸入食物名稱");
+
+        return;
+
+    }
+
+    if (!calories || calories < 0) {
+
+        alert("請輸入正確的熱量");
+
+        return;
+
+    }
+
+    if (!quantity || quantity <= 0) {
+
+        alert("請輸入正確的份量");
+
+        return;
+
+    }
+
+    const totalCalories =
+        calories * quantity;
+
+    const food = {
+
+        name,
+        calories,
+        unit,
+        quantity,
+        totalCalories,
+        mealType
+
+    };
+
+    getDayRecords(currentDate).push(food);
+
+    /*
+       同時存到自己的食物資料庫。
+    */
+
+    const exists =
+        myFoods.some(oldFood =>
+            oldFood.name === name &&
+            Number(oldFood.calories) === calories &&
+            oldFood.unit === unit
+        );
+
+    if (!exists) {
+
+        myFoods.unshift({
+
+            name,
+            calories,
+            unit
+
+        });
+
+    }
+
+    myFoods =
+        deduplicateFoods(myFoods);
+
+    saveData();
+
+    closeAddModal();
+
+    renderToday();
+
+}
+
+
+/* =====================================================
+   編輯
+===================================================== */
+
+function openEditModal(index) {
+
+    const food =
+        getDayRecords(currentDate)[index];
+
+    if (!food) {
+
+        return;
+
+    }
+
+    editingIndex = index;
+
+    document.getElementById("editName").value =
+        food.name;
+
+    document.getElementById("editCalories").value =
+        food.calories;
+
+    document.getElementById("editUnit").value =
+        food.unit;
+
+    document.getElementById("editQuantity").value =
+        food.quantity;
+
+    document.getElementById("editMealType").value =
+        food.mealType;
+
+    document.getElementById("editModal")
+        .classList.remove("hidden");
+
+}
+
+
+function closeEditModal() {
+
+    document.getElementById("editModal")
+        .classList.add("hidden");
+
+    editingIndex = null;
+
+}
+
+
+function saveEdit() {
+
+    if (editingIndex === null) {
+
+        return;
+
+    }
+
+    const name =
+        document.getElementById("editName")
+            .value
+            .trim();
+
+    const calories =
+        Number(
+            document.getElementById("editCalories")
+                .value
+        );
+
+    const unit =
+        document.getElementById("editUnit")
+            .value
+            .trim() || "份";
+
+    const quantity =
+        Number(
+            document.getElementById("editQuantity")
+                .value
+        );
+
+    const mealType =
+        document.getElementById("editMealType")
+            .value;
+
+    if (!name || calories < 0 || quantity <= 0) {
+
+        alert("請確認資料");
+
+        return;
+
+    }
+
+    getDayRecords(currentDate)[editingIndex] = {
+
+        name,
+        calories,
+        unit,
+        quantity,
+        totalCalories: calories * quantity,
+        mealType
+
+    };
+
+    saveData();
+
+    closeEditModal();
+
+    renderToday();
+
+}
+
+
+/* =====================================================
+   刪除
+===================================================== */
+
+function deleteFood(index) {
+
+    const food =
+        getDayRecords(currentDate)[index];
+
+    if (!food) {
+
+        return;
+
+    }
+
+    const confirmDelete =
+        confirm(`確定要刪除「${food.name}」嗎？`);
+
+    if (!confirmDelete) {
+
+        return;
+
+    }
+
+    getDayRecords(currentDate)
+        .splice(index, 1);
+
+    saveData();
+
+    renderToday();
+
+}
+
+
+/* =====================================================
+   喝水
+===================================================== */
+
+function addWater(amount) {
+
+    const current =
+        Number(waterRecords[currentDate]) || 0;
+
+    waterRecords[currentDate] =
+        current + amount;
+
+    saveData();
+
+    renderToday();
+
+}
+
+
+function customWater() {
+
+    const input =
+        prompt(
+            "這次喝了多少 ml？",
+            "300"
+        );
+
+    if (input === null) {
+
+        return;
+
+    }
+
+    const amount =
+        Number(input);
+
+    if (!amount || amount <= 0) {
+
+        alert("請輸入正確的數字");
+
+        return;
+
+    }
+
+    addWater(amount);
+
+}
+
+
+function clearWater() {
+
+    const confirmClear =
+        confirm("確定要清除今天的喝水紀錄嗎？");
+
+    if (!confirmClear) {
+
+        return;
+
+    }
+
+    waterRecords[currentDate] = 0;
+
+    saveData();
+
+    renderToday();
+
+}
+
+
+/* =====================================================
+   體重
+===================================================== */
+
+function openWeightModal() {
+
+    document.getElementById("weightModal")
+        .classList.remove("hidden");
+
+    document.getElementById("weightDateLabel").textContent =
+        `將紀錄到：${getFullDisplayDate(currentDate)}`;
+
+    const existing =
+        weightRecords[currentDate];
+
+    document.getElementById("weightInput").value =
+        existing || "";
+
+}
+
+
+function closeWeightModal() {
+
+    document.getElementById("weightModal")
+        .classList.add("hidden");
+
+}
+
+
+function saveWeight() {
+
+    const weight =
+        Number(
+            document.getElementById("weightInput")
+                .value
+        );
+
+    if (!weight || weight < 20 || weight > 300) {
+
+        alert("請輸入合理的體重");
+
+        return;
+
+    }
+
+    weightRecords[currentDate] =
+        weight;
+
+    /*
+       如果沒有手動設定目標，
+       新體重會直接影響今天的建議。
+    */
+
+    saveData();
+
+    closeWeightModal();
+
+    renderToday();
+
+}
+
+
+/* =====================================================
+   歷史紀錄
+===================================================== */
+
+function getAllDates() {
+
+    const dates =
+        new Set([
+            ...Object.keys(records),
+            ...Object.keys(weightRecords),
+            ...Object.keys(waterRecords)
+        ]);
+
+    return Array.from(dates)
+        .sort()
+        .reverse();
+
+}
+
+
+function renderHistory() {
+
+    const container =
+        document.getElementById("historyList");
+
+    const dates =
+        getAllDates();
+
+    if (dates.length === 0) {
+
+        container.innerHTML =
+            `<div class="empty">
+                還沒有任何歷史紀錄
+            </div>`;
+
+        return;
+
+    }
+
+    container.innerHTML =
+        dates.map(date => {
+
+            const calories =
+                getDayCalories(date);
+
+            const water =
+                Number(waterRecords[date]) || 0;
+
+            const weight =
+                Number(weightRecords[date]) || null;
+
+            return `
+
+                <button
+                    class="history-item"
+                    style="width:100%; text-align:left;"
+                    onclick="openHistoryDate('${date}')">
+
+                    <div class="history-top">
+
+                        <span>
+                            ${getFullDisplayDate(date)}
+                        </span>
+
+                        <span>
+                            ${Math.round(calories)} kcal
+                        </span>
+
+                    </div>
+
+                    <div class="history-bottom">
+
+                        <span>
+                            💧 ${Math.round(water)} ml
+                        </span>
+
+                        <span>
+                            ⚖️ ${weight ? weight.toFixed(1) + " kg" : "--"}
+                        </span>
+
+                    </div>
+
+                </button>
+
+            `;
+
+        }).join("");
+
+}
+
+
+function openHistoryDate(date) {
+
+    currentDate = date;
+
+    showPage("today");
+
+}
+
+
+/* =====================================================
+   統計資料
+===================================================== */
+
+function getLastDates(days) {
+
+    const result = [];
+
+    const today =
+        parseDate(getToday());
+
+    for (let i = days - 1; i >= 0; i--) {
+
+        const date =
+            new Date(today);
+
+        date.setDate(
+            date.getDate() - i
+        );
+
+        result.push(
+            formatDate(date)
+        );
+
+    }
+
+    return result;
+
+}
+
+
+function getLastWeightRecords(days) {
+
+    const dates =
+        getLastDates(days);
+
+    return dates
+        .filter(date =>
+            Number(weightRecords[date]) > 0
+        )
+        .map(date => ({
+
+            date,
+            value:
+                Number(weightRecords[date])
+
+        }));
+
+}
+
+
+/* =====================================================
+   Canvas
+===================================================== */
+
+function prepareCanvas(canvas) {
+
+    const rect =
+        canvas.getBoundingClientRect();
+
+    const ratio =
+        window.devicePixelRatio || 1;
+
+    const width =
+        rect.width;
+
+    const height =
+        230;
+
+    canvas.width =
+        width * ratio;
+
+    canvas.height =
+        height * ratio;
+
+    const ctx =
+        canvas.getContext("2d");
+
+    ctx.setTransform(
+        ratio,
+        0,
+        0,
+        ratio,
+        0,
+        0
+    );
+
+    return {
+        ctx,
+        width,
+        height
+    };
+
+}
+
+
+/* =====================================================
+   折線圖
+===================================================== */
+
+function drawLineChart(
+    canvas,
+    labels,
+    values,
+    options = {}
+) {
+
+    const {
+        ctx,
+        width,
+        height
+    } = prepareCanvas(canvas);
+
+    ctx.clearRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+    const padding = {
+
+        left: 45,
+        right: 15,
+        top: 15,
+        bottom: 35
+
+    };
+
+    const chartWidth =
+        width -
+        padding.left -
+        padding.right;
+
+    const chartHeight =
+        height -
+        padding.top -
+        padding.bottom;
+
+    const validValues =
+        values.filter(
+            value =>
+                value !== null &&
+                !isNaN(value)
+        );
+
+    if (validValues.length === 0) {
+
+        ctx.fillStyle = "#999";
+
+        ctx.font = "14px sans-serif";
+
+        ctx.textAlign = "center";
+
+        ctx.fillText(
+            "還沒有足夠的資料",
+            width / 2,
+            height / 2
+        );
+
+        return;
+
+    }
+
+    let minValue =
+        options.minValue !== undefined
+            ? options.minValue
+            : Math.min(...validValues);
+
+    let maxValue =
+        options.maxValue !== undefined
+            ? options.maxValue
+            : Math.max(...validValues);
+
+    if (minValue === maxValue) {
+
+        minValue -= 1;
+
+        maxValue += 1;
+
+    }
+
+    const range =
+        maxValue - minValue;
+
+    minValue -= range * 0.1;
+
+    maxValue += range * 0.1;
+
+    /* 網格線 */
+
+    ctx.strokeStyle = "#e5e5e5";
+
+    ctx.lineWidth = 1;
+
+    ctx.fillStyle = "#999";
+
+    ctx.font = "11px sans-serif";
+
+    ctx.textAlign = "right";
+
+    for (let i = 0; i <= 4; i++) {
+
+        const y =
+            padding.top +
+            chartHeight * i / 4;
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            padding.left,
+            y
+        );
+
+        ctx.lineTo(
+            width - padding.right,
+            y
+        );
+
+        ctx.stroke();
+
+        const value =
+            maxValue -
+            (maxValue - minValue) * i / 4;
+
+        ctx.fillText(
+            Math.round(value),
+            padding.left - 7,
+            y + 4
+        );
+
+    }
+
+    /* X 軸 */
+
+    ctx.textAlign = "center";
+
+    labels.forEach((label, index) => {
+
+        if (labels.length === 1) {
+
+            return;
+
+        }
+
+        const x =
+            padding.left +
+            chartWidth *
+            index /
+            (labels.length - 1);
+
+        ctx.fillStyle = "#999";
+
+        ctx.fillText(
+            label,
+            x,
+            height - 10
+        );
+
+    });
+
+    function getX(index) {
+
+        if (labels.length === 1) {
+
+            return padding.left +
+                chartWidth / 2;
+
+        }
+
+        return padding.left +
+            chartWidth *
+            index /
+            (labels.length - 1);
+
+    }
+
+    function getY(value) {
+
+        return padding.top +
+            chartHeight *
+            (maxValue - value) /
+            (maxValue - minValue);
+
+    }
+
+    /* 目標線 */
+
+    if (
+        options.target !== undefined &&
+        options.target >= minValue &&
+        options.target <= maxValue
+    ) {
+
+        const targetY =
+            getY(options.target);
+
+        ctx.save();
+
+        ctx.setLineDash([5, 5]);
+
+        ctx.strokeStyle = "#999";
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            padding.left,
+            targetY
+        );
+
+        ctx.lineTo(
+            width - padding.right,
+            targetY
+        );
+
+        ctx.stroke();
+
+        ctx.restore();
+
+    }
+
+    /* 折線 */
+
+    ctx.strokeStyle = "#222";
+
+    ctx.lineWidth = 2;
+
+    ctx.lineJoin = "round";
+
+    ctx.lineCap = "round";
+
+    let previous = null;
+
+    values.forEach((value, index) => {
+
+        if (
+            value === null ||
+            isNaN(value)
+        ) {
+
+            previous = null;
+
+            return;
+
+        }
+
+        const x =
+            getX(index);
+
+        const y =
+            getY(value);
+
+        if (previous !== null) {
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                previous.x,
+                previous.y
+            );
+
+            ctx.lineTo(
+                x,
+                y
+            );
+
+            ctx.stroke();
+
+        }
+
+        previous = {
+            x,
+            y
+        };
+
+    });
+
+    /* 點 */
+
+    values.forEach((value, index) => {
+
+        if (
+            value === null ||
+            isNaN(value)
+        ) {
+
+            return;
+
+        }
+
+        const x =
+            getX(index);
+
+        const y =
+            getY(value);
+
+        ctx.fillStyle = "#222";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            x,
+            y,
+            4,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fill();
+
+    });
+
+}
+
+
+/* =====================================================
+   統計
+===================================================== */
+
+function renderStats() {
+
+    /*
+       熱量
+    */
+
+    const calorieDates =
+        getLastDates(7);
+
+    const calorieValues =
+        calorieDates.map(
+            date => getDayCalories(date)
+        );
+
+    const calorieLabels =
+        calorieDates.map(
+            date => getDisplayDate(date)
+        );
+
+    const calorieTarget =
+        getCalorieTarget(getToday());
+
+    document.getElementById(
+        "calorieChartSubtitle"
+    ).textContent =
+        `每日攝取量・目前建議目標 ${Math.round(calorieTarget)} kcal`;
+
+    drawLineChart(
+        document.getElementById("calorieChart"),
+        calorieLabels,
+        calorieValues,
+        {
+            target: calorieTarget
+        }
+    );
+
+
+    /*
+       體重
+    */
+
+    const weightData =
+        getLastWeightRecords(14);
+
+    const weightLabels =
+        weightData.map(
+            item => getDisplayDate(item.date)
+        );
+
+    const weightValues =
+        weightData.map(
+            item => item.value
+        );
+
+    drawLineChart(
+        document.getElementById("weightChart"),
+        weightLabels,
+        weightValues
+    );
+
+
+    /*
+       喝水
+    */
+
+    const waterDates =
+        getLastDates(7);
+
+    const waterValues =
+        waterDates.map(
+            date =>
+                Number(waterRecords[date]) || 0
+        );
+
+    const waterLabels =
+        waterDates.map(
+            date => getDisplayDate(date)
+        );
+
+    drawLineChart(
+        document.getElementById("waterChart"),
+        waterLabels,
+        waterValues,
+        {
+            minValue: 0,
+            target: getWaterTarget(getToday())
+        }
+    );
+
+
+    /*
+       平均熱量
+    */
+
+    const averageCalories =
+        calorieValues.reduce(
+            (a, b) => a + b,
+            0
+        ) / calorieValues.length;
+
+    document.getElementById(
+        "averageCalories"
+    ).textContent =
+        `${Math.round(averageCalories)} kcal`;
+
+
+    /*
+       平均喝水
+    */
+
+    const averageWater =
+        waterValues.reduce(
+            (a, b) => a + b,
+            0
+        ) / waterValues.length;
+
+    document.getElementById(
+        "averageWater"
+    ).textContent =
+        `${Math.round(averageWater)} ml`;
+
+
+    /*
+       最近體重
+    */
+
+    if (weightData.length > 0) {
+
+        const latest =
+            weightData[weightData.length - 1].value;
+
+        document.getElementById(
+            "latestWeight"
+        ).textContent =
+            `${latest.toFixed(1)} kg`;
+
+    } else {
+
+        document.getElementById(
+            "latestWeight"
+        ).textContent =
+            "--";
+
+    }
+
+
+    /*
+       體重變化
+    */
+
+    if (weightData.length >= 2) {
+
+        const first =
+            weightData[0].value;
+
+        const last =
+            weightData[weightData.length - 1].value;
+
+        const change =
+            last - first;
+
+        const sign =
+            change > 0 ? "+" : "";
+
+        document.getElementById(
+            "weightChange"
+        ).textContent =
+            `${sign}${change.toFixed(1)} kg`;
+
+    } else {
+
+        document.getElementById(
+            "weightChange"
+        ).textContent =
+            "--";
+
+    }
+
+}
+
+
+/* =====================================================
+   設定
+===================================================== */
+
+function renderSettings() {
+
+    document.getElementById(
+        "dailyTargetInput"
+    ).value =
+        getCalorieTarget(currentDate);
+
+    document.getElementById(
+        "waterTargetInput"
+    ).value =
+        getWaterTarget(currentDate);
+
+}
+
+
+function saveSettings() {
+
+    const calorie =
+        Number(
+            document.getElementById(
+                "dailyTargetInput"
+            ).value
+        );
+
+    const water =
+        Number(
+            document.getElementById(
+                "waterTargetInput"
+            ).value
+        );
+
+    if (
+        !calorie ||
+        calorie < 500 ||
+        calorie > 10000
+    ) {
+
+        alert("請輸入合理的熱量目標");
+
+        return;
+
+    }
+
+    if (
+        !water ||
+        water < 500 ||
+        water > 10000
+    ) {
+
+        alert("請輸入合理的喝水目標");
+
+        return;
+
+    }
+
+    dailyTarget = calorie;
+
+    waterTarget = water;
+
+    manualTarget = true;
+
+    manualWaterTarget = true;
+
+    saveData();
+
+    renderToday();
+
+    alert("設定已儲存");
+
+}
+
+
+/*
+   清除手動設定，恢復自動計算
+*/
+
+function resetAutomaticTargets() {
+
+    manualTarget = false;
+
+    manualWaterTarget = false;
+
+    dailyTarget = null;
+
+    waterTarget = null;
+
+    localStorage.removeItem("dailyTarget");
+
+    localStorage.removeItem("waterTarget");
+
+    saveData();
+
+    renderSettings();
+
+    renderToday();
+
+}
+
+
+/* =====================================================
+   頁面切換
+===================================================== */
+
+function showPage(page) {
+
+    const pages = {
+
+        today:
+            document.getElementById("todayPage"),
+
+        history:
+            document.getElementById("historyPage"),
+
+        stats:
+            document.getElementById("statsPage"),
+
+        settings:
+            document.getElementById("settingsPage")
+
+    };
+
+    Object.values(pages).forEach(
+        element =>
+            element.classList.add("hidden")
+    );
+
+    pages[page].classList.remove("hidden");
+
+
+    /*
+       導覽按鈕
+    */
+
+    document.querySelectorAll(".nav-button")
+        .forEach(button =>
+            button.classList.remove("active")
+        );
+
+    document.getElementById(
+        "nav" +
+        page.charAt(0).toUpperCase() +
+        page.slice(1)
+    ).classList.add("active");
+
+
+    /*
+       新增食物按鈕只在今天頁面出現
+    */
+
+    document.getElementById(
+        "addFoodButton"
+    ).classList.toggle(
+        "hidden",
+        page !== "today"
+    );
+
+
+    if (page === "history") {
+
+        renderHistory();
+
+    }
+
+    if (page === "stats") {
+
+        requestAnimationFrame(
+            renderStats
+        );
+
+    }
+
+    if (page === "settings") {
+
+        renderSettings();
+
+    }
+
+}
+
+
+/* =====================================================
+   啟動
+===================================================== */
+
+initializeData();
+
+renderToday();
+
+</script>
+
+</body>
+</html>
